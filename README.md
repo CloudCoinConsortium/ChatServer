@@ -36,7 +36,7 @@ $ ./chatserver 4000
 Accepting connections on port 4000
 ```
 ### Connecting Clients
-Make sure that each client is from its own independent machine. To connect to the server you use the following sytax (HOST NAME is the name of the machine he server binary is run on):
+Make sure that each client is from its own independent machine. To connect to the server you use the following sytax (HOST NAME is the name of the machine the server binary is running on):
 ```
 $ ./chatclient [HOST NAME] [PORT NUMBER] [USERNAME]
 ```
@@ -72,16 +72,18 @@ Here is an example of how direct messaging works with clients:
 Please enter a command: P (Public message), D (Direct message), Q (Quit)
 > D
 Peers online: 
- will
+ Alexander
+ Shubham
+ Partha
 
-Peer to message: will
+Peer to message: Alexander
 Message: test2
 ```
 The other client would see this in their console:
 ```
 Please enter a command: P (Public message), D (Direct message), Q (Quit)
 > 
-*** Incoming private message from wfritz ***: test2
+*** Incoming private message from Sean***: test2
 >
 ```
 ## How 'users.csv' Works

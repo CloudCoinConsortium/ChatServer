@@ -1,8 +1,5 @@
-// Will Fritz
 // tcp chatroom client
-// 3/25/2019
 
-// includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,101 +22,17 @@
 // macros
 #define MAX_LINE 2048
 
-// namespace
 using namespace std;
 
 // globals
-int sockFd;
+int sockfd;
 bool PSEND;
 vector<string> onlineUsers;
 string USERNAME;
 bool ABORT_DIR_MSG;
 string PUB_KEY_FOR_MSG;
 
-// proototypes
-void *handle_messages(void*);
-void handle_login(string);
-int recvWithCheck(string&);
-void send_string(string);
-void promptUser();
-void publicMessage();
-void directMessage();
 
-void send_short(short int val) {
-	char toSend[MAX_LINE];
-	sprintf(toSend, "%d", val);
-	send_string(toSend);
-}
-
-void send_long(long int val) {
-	char toSend[MAX_LINE];
-	sprintf(toSend, "%d", val);
-	send_string(toSend);
-}
-
-int rec_int() {
-	int i;
-	char buf[MAX_LINE];	
-
-	if ((i = recv(sockFd, buf, sizeof(buf), 0)) == -1) {
-		perror("did not receive int value");
-		exit(1);
-	}
-	
-	int value;
-	sscanf(buf, "%d", &value); // convert value to an int
-
-	return value;
-}
-
-int main(int argc, char * argv[]) {
-    char buf[MAX_LINE];
-
-    // commmand line arg checking
-    if (argc != 4){
-        fprintf(stderr, "You need 4 inputs, you provided: %d\n", argc);
-        exit(1);
-    }
-
-    // load adress structs
-    struct addrinfo hints, *clientInfo, *ptr;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    int returnVal;
-    if ((returnVal = getaddrinfo(argv[1],argv[2], &hints, &clientInfo)) != 0){
-        fprintf(stderr, "getaddrinfo: %s\n", returnVal);
-        exit(1);
-    }
-
-    cout << "Connecting to " << argv[1] << " on port " << argv[2] << endl;
-    for (ptr = clientInfo; ptr != NULL; ptr = ptr->ai_next){
-        if ((sockFd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) <0 ){
-            perror("bad socket");
-            continue;
-        }
-        if (connect(sockFd, ptr->ai_addr, ptr->ai_addrlen) < 0){
-            perror("bad connect");
-            close(sockFd);
-            continue;
-        }
-    }
-    cout << "Conected to " << argv[1] << endl; 
-	
-    // handle login
-	string username(argv[3]);
-    USERNAME = username;
-    handle_login(username);
-
-	pthread_t msgThread;
-    if (pthread_create(&msgThread, NULL, handle_messages, NULL)){
-        perror("create handle_messages thread");
-        exit(1);
-    }
-    promptUser();
-    close(sockFd);
-}
 void displayPrompt(){
     cout << "Please enter a command: P (Public message), D (Direct message), Q (Quit)" << endl;
     cout << "> ";
@@ -318,14 +231,14 @@ int recvWithCheck(string &outMsg) {
 
     memset(buf, 0, len);
  
-    if ((numBytesRec=recv(sockFd, buf, len, flags)) == -1){
+    if ((numBytesRec=recv(sockfd, buf, len, flags)) == -1){
         perror("receive error");
-        close(sockFd);
+        close(sockfd);
         exit(1);
     }
     if (numBytesRec == 0){
         cout << "recvWithCheck: zero bytes received" << endl;
-        close(sockFd);
+        close(sockfd);
         exit(1);
     }
     outMsg = buf;
@@ -334,10 +247,86 @@ int recvWithCheck(string &outMsg) {
 
 void send_string(string toSend) {
     int len = toSend.length();
-    if (send(sockFd, toSend.c_str(), len, 0) == -1) {
+    if (send(sockfd, toSend.c_str(), len, 0) == -1) {
         perror("Client send error!\n");
         exit(1);
     }
 }
+
+void send_short(short int val) {
+	char toSend[MAX_LINE];
+	sprintf(toSend, "%d", val);
+	send_string(toSend);
+}
+
+void send_long(long int val) {
+	char toSend[MAX_LINE];
+	sprintf(toSend, "%d", val);
+	send_string(toSend);
+}
+
+int rec_int() {
+	int i;
+	char buf[MAX_LINE];	
+
+	if ((i = recv(sockfd, buf, sizeof(buf), 0)) == -1) {
+		perror("did not receive int value");
+		exit(1);
+	}
+	
+	int value;
+	sscanf(buf, "%d", &value); // convert value to an int
+
+	return value;
+}
+
+int main(int argc, char * argv[]) {
+    char buf[MAX_LINE];
+
+    // commmand line arg checking
+    if (argc != 4){
+        fprintf(stderr, "Please enter correct port no.\n");
+        exit(1);
+    }
+
+    struct addrinfo hints, *clientInfo, *ptr;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int returnVal;
+    if ((returnVal = getaddrinfo(argv[1],argv[2], &hints, &clientInfo)) != 0){
+        fprintf(stderr, "getaddrinfo: %s\n", returnVal);
+        exit(1);
+    }
+
+    cout << "Connecting to " << argv[1] << " on port " << argv[2] << endl;
+    for (ptr = clientInfo; ptr != NULL; ptr = ptr->ai_next){
+        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) <0 ){
+            perror(" socket creation failed");
+            continue;
+        }
+        if (connect(sockfd, ptr->ai_addr, ptr->ai_addrlen) < 0){
+            perror("socket connect failed");
+            close(sockfd);
+            continue;
+        }
+    }
+    cout << "Conected to " << argv[1] << endl; 
+	
+    // handle login
+	string username(argv[3]);
+    USERNAME = username;
+    handle_login(username);
+
+	pthread_t msgThread;
+    if (pthread_create(&msgThread, NULL, handle_messages, NULL)){
+        perror("create handle_messages thread");
+        exit(1);
+    }
+    promptUser();
+    close(sockfd);
+}
+
 
 
