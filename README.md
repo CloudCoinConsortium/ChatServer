@@ -1,13 +1,11 @@
 # tcp-chatroom
 ## Overview
-This is an exmample of a client-server model where the clients connect to the server using a tcp socket connection. Both the client and the server are written in C/C++. 
 
 The server hosts multiple concurrent clients and needs to be run once. Then each different client can use the './chatclient' binary to connect to the server. 
 
 The clients can choose to message everyone in the chat or direct message certain users.
 
 ## How to Compile
-Make sure you have the capabilities to link the 'crypto' library in C/C++ code using g++.
 ### Compiling the server
 ```
 $ cd ./server
@@ -26,13 +24,13 @@ g++ -o chatclient -std=c++11 -lpthread -lcrypto -lz chatclient.o
 ## Using the Compiled Binaries
 First we have to launch the server so it can connect multiple clients.
 ### Launching Server
-Use the following command in the '/server' folder where the chatserver binary lives. Replace 4000 below with any PORT NUMBER:
+Use the following command in the '/server' folder where the chatserver binary lives. Replace 8000 below with any PORT NUMBER:
 ```
 $ ./chatserver [PORT NUMBER]
 ```
 Example:
 ```
-$ ./chatserver 4000
+$ ./chatserver 8000
 Accepting connections on port 4000
 ```
 ### Connecting Clients
@@ -42,9 +40,12 @@ $ ./chatclient [HOST NAME] [PORT NUMBER] [USERNAME]
 ```
 Example:
 ```
-$ ./chatclient student01.cse.nd.edu 4000 will
-Connecting to student01.cse.nd.edu on port 4000
-Conected to student01.cse.nd.edu
+$ ./chatclient
+Enter the Ip Address: 127.0.0.1
+Enter the Port no.: 8000
+Enter the Username: Shubham
+Connecting to 127.0.0.1 on port 8000
+Conected to 127.0.0.1
 pass: password
 
 Successfully Joined Chat

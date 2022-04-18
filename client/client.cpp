@@ -297,7 +297,7 @@ int main(int argc, char * argv[]) {
     int port_no;
 
 
-    cout << "Enter the Host name: ";
+    cout << "Enter the Ip Address: ";
     cin >> ip_address;
 
     cout << "Enter the Port no.: ";
