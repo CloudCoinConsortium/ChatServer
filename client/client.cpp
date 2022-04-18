@@ -44,7 +44,7 @@ void directMessage();
 
 
 void displayPrompt(){
-    cout << "Please enter a command: P (Public message), D (Direct message), Q (Quit)" << endl;
+    cout << "Please enter a command: D (Direct message/Chatroom), Q (Quit)" << endl;
     cout << "> ";
 }
 
