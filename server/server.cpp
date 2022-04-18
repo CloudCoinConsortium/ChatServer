@@ -22,15 +22,12 @@
 #include <map>
 #include <pthread.h>
 
-// macros
 #define MAX_PENDING 5
 #define MAX_LINE 2048
 #define MAX_CLIENTS 10
 
-// namespace
 using namespace std;
 
-// structs
 struct User{
     int mSock;
     string mPubKey;
@@ -43,7 +40,7 @@ int s, new_s, NUM_THREADS;
 map<string, User> users;
 
 // prototpes
-void *clientinteraction(void*);
+void* clientinteraction(void*);
 void handle_login();
 int recvWithCheck(int, string&);
 void send_string(string);
@@ -52,7 +49,8 @@ void directMessage(int);
 
 // main method
 int main(int argc, char * argv[]) {
-	struct sockaddr_in sin, client_addr;
+	
+    struct sockaddr_in sin, client_addr;
     char buf[MAX_LINE];
 	bzero((char *)&buf, sizeof(buf));
     int addr_len, SERVER_PORT, len;
@@ -220,7 +218,7 @@ void handle_login(int sock) {
 }
 
 // thread for each client
-void *clientinteraction(void *socket_desc) {
+void* clientinteraction(void *socket_desc) {
 
 	int sock = *(int*)socket_desc;
 	int read_size;

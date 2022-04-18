@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -31,6 +32,15 @@ vector<string> onlineUsers;
 string USERNAME;
 bool ABORT_DIR_MSG;
 string PUB_KEY_FOR_MSG;
+
+// proototypes
+void *handle_messages(void*);
+void handle_login(string);
+int recvWithCheck(string&);
+void send_string(string);
+void promptUser();
+void publicMessage();
+void directMessage();
 
 
 void displayPrompt(){
@@ -261,7 +271,7 @@ void send_short(short int val) {
 
 void send_long(long int val) {
 	char toSend[MAX_LINE];
-	sprintf(toSend, "%d", val);
+	sprintf(toSend, "%ld", val);
 	send_string(toSend);
 }
 
@@ -282,41 +292,45 @@ int rec_int() {
 
 int main(int argc, char * argv[]) {
     char buf[MAX_LINE];
+    struct sockaddr_in serv_addr;
+    string ip_address, username;
+    int port_no;
 
-    // commmand line arg checking
-    if (argc != 4){
-        fprintf(stderr, "Please enter correct port no.\n");
-        exit(1);
+
+    cout << "Enter the Host name: ";
+    cin >> ip_address;
+
+    cout << "Enter the Port no.: ";
+    cin >> port_no;
+
+    cout << "Enter the Username:";
+    cin >> username;
+
+    //cout << "Ip Address: " << ip_address << " Port: " <<port_no <<endl;
+
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror(" Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+ 
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port_no);
+
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, ip_address.c_str(), &serv_addr.sin_addr) <= 0) {
+        printf("\nInvalid address/ Address not supported \n");
+        exit(EXIT_FAILURE);
     }
 
-    struct addrinfo hints, *clientInfo, *ptr;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    int returnVal;
-    if ((returnVal = getaddrinfo(argv[1],argv[2], &hints, &clientInfo)) != 0){
-        fprintf(stderr, "getaddrinfo: %s\n", returnVal);
-        exit(1);
+    cout << "Connecting to " << ip_address << " on port " << port_no << endl;
+    if (connect(sockfd, (struct sockaddr*)&serv_addr,sizeof(serv_addr)) < 0) {
+        perror("Socket connection failed");
+        exit(EXIT_FAILURE);
     }
 
-    cout << "Connecting to " << argv[1] << " on port " << argv[2] << endl;
-    for (ptr = clientInfo; ptr != NULL; ptr = ptr->ai_next){
-        if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) <0 ){
-            perror(" socket creation failed");
-            continue;
-        }
-        if (connect(sockfd, ptr->ai_addr, ptr->ai_addrlen) < 0){
-            perror("socket connect failed");
-            close(sockfd);
-            continue;
-        }
-    }
-    cout << "Conected to " << argv[1] << endl; 
-	
+    cout << "Conected to: " << ip_address << endl; 
+
     // handle login
-	string username(argv[3]);
-    USERNAME = username;
     handle_login(username);
 
 	pthread_t msgThread;
@@ -324,7 +338,7 @@ int main(int argc, char * argv[]) {
         perror("create handle_messages thread");
         exit(1);
     }
-    promptUser();
+    promptUser(); 
     close(sockfd);
 }
 
