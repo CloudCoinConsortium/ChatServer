@@ -1,11 +1,8 @@
-# tcp-chatroom
-## Overview
+# CHATSERVER
 
 The server hosts multiple concurrent clients and needs to be run once. Then each different client can use the './chatclient' binary to connect to the server. 
-
 The clients can choose to message everyone in the chat or direct message certain users.
 
-## How to Compile
 ### Compiling the server
 ```
 $ cd ./server
@@ -21,9 +18,8 @@ g++ -std=c++11 -c -o chatclient.o client.cpp
 g++ -o chatclient -std=c++11 -lpthread -lcrypto -lz chatclient.o
 ```
 
-## Using the Compiled Binaries
-First we have to launch the server so it can connect multiple clients.
 ### Launching Server
+First we have to launch the server so it can connect multiple clients.
 Use the following command in the '/server' folder where the chatserver binary lives. Replace 8000 below with any PORT NUMBER:
 ```
 $ ./chatserver [PORT NUMBER]
@@ -34,9 +30,9 @@ $ ./chatserver 8000
 Accepting connections on port 4000
 ```
 ### Connecting Clients
-Make sure that each client is from its own independent machine. To connect to the server you use the following sytax (HOST NAME is the name of the machine the server binary is running on):
+ To connect to the server you use the following sytax (IP Address of the machine the server binary is running on):
 ```
-$ ./chatclient [HOST NAME] [PORT NUMBER] [USERNAME]
+$ ./chatclient
 ```
 Example:
 ```
